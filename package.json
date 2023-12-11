@@ -5,7 +5,13 @@
   "author": "Joao Marco de Souza Matta",
   "private": true,
   "license": "UNLICENSED",
+  "prisma": {
+    "seed": "ts-node ./prisma/seed.ts"
+  },
   "scripts": {
+    "migrate": "npx prisma migrate dev --name init",
+    "migration-reset": "npx prisma migrate reset",
+    "seed": "ts-node ./prisma/seed.ts",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -23,6 +29,7 @@
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
+    "@prisma/client": "5.7.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1"
   },
