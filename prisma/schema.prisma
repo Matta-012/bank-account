@@ -2,10 +2,66 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgcrypto]
+}
+
+enum AccountTypeEnum {
+  savings
+  checking
+}
+
+enum TransactionTypeEnum {
+  withdrawal
+  deposit
+}
+
+model AccountType {
+  id         Int             @id @default(autoincrement())
+  type       AccountTypeEnum @unique
+  created_at DateTime        @default(now())
+  account    Account[]
+}
+
+model TransactionType {
+  id          Int                 @id @default(autoincrement())
+  type        TransactionTypeEnum @unique
+  created_at  DateTime            @default(now())
+  transaction Transaction[]
+}
+
+model Transaction {
+  id                  String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  transaction_type    TransactionType @relation(fields: [transaction_type_id], references: [id])
+  transaction_type_id Int
+  description         String?
+  amount              Decimal         @db.Decimal(9, 2)
+  created_at          DateTime        @default(now())
+  account             Account         @relation(fields: [account_number], references: [account_number])
+  account_number      Int
+}
+
+model Branch {
+  id      Int       @id @default(autoincrement())
+  name    String
+  account Account[]
+}
+
+model Account {
+  account_number  Int           @id @default(autoincrement())
+  branch          Branch        @relation(fields: [branch_id], references: [id])
+  branch_id       Int
+  account_type    AccountType   @relation(fields: [account_type_id], references: [id])
+  account_type_id Int
+  balance         Decimal       @db.Decimal(9, 2)
+  active          Boolean       @default(true)
+  created_at      DateTime      @default(now())
+  updated_at      DateTime?
+  transaction     Transaction[]
 }
