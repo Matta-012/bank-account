@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  nestjs-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: bank_account
+    depends_on:
+      - postgres
+    networks:
+      - nestjs-network
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: bank_account
+    ports:
+      - "5432:5432"
+    networks:
+      - nestjs-network
+
+networks:
+  nestjs-network:
+    driver: bridge
