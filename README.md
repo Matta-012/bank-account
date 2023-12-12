@@ -21,6 +21,8 @@ Wait until the installation is finished.
 Open a new terminal window, make sure you are inside the project directory, and run the following commands to migrate the database and seed it:
 
 ```
+npm install
+
 npm run migrate
 
 npm run seed
