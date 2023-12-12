@@ -17,7 +17,8 @@ import { Request, Response } from 'express';
 import { AccountService } from './account.service';
 import { Account } from '@prisma/client';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreatAccountDto } from './dto/create-account.dto';
+import { CreateAccountDto } from './dto/create-account.dto';
+import { UpdateAccountDto } from './dto/update-account.dto';
 
 @Controller('api/v1/account')
 @ApiTags('account')
@@ -25,8 +26,34 @@ export class AccountController {
   constructor(private readonly accountService: AccountService) {}
 
   @Post()
-  async create(@Body() createAccountDto: CreatAccountDto): Promise<Account> {
+  @HttpCode(201)
+  async create(@Body() createAccountDto: CreateAccountDto): Promise<Account> {
     return this.accountService.create(createAccountDto);
+  }
+
+  @Put(':accountNumber')
+  @HttpCode(200)
+  async update(
+    @Param('accountNumber') accountNumber: string,
+    @Body() updateAccountDto: UpdateAccountDto,
+  ): Promise<Account> {
+    return this.accountService.update(Number(accountNumber), updateAccountDto);
+  }
+
+  @Put('inactivate/:accountNumber')
+  @HttpCode(200)
+  async inactivate(
+    @Param('accountNumber') accountNumber: string,
+  ): Promise<Account> {
+    return this.accountService.inactivate(Number(accountNumber));
+  }
+
+  @Put('activate/:accountNumber')
+  @HttpCode(200)
+  async activate(
+    @Param('accountNumber') accountNumber: string,
+  ): Promise<Account> {
+    return this.accountService.activate(Number(accountNumber));
   }
 
   @Get()
@@ -52,7 +79,7 @@ export class AccountController {
   @ApiResponse({
     status: 200,
     description: 'The Account found',
-    type: CreatAccountDto,
+    type: CreateAccountDto,
   })
   async getById(
     @Param('accountNumber') accountNumber: string,
