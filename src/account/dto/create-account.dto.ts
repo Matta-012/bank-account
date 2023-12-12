@@ -1,6 +1,6 @@
 import { IsDecimal, IsInt } from 'class-validator';
 
-export class CreatAccountDto {
+export class CreateAccountDto {
   @IsInt()
   branch_id: number;
 
