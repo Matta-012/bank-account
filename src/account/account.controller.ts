@@ -16,49 +16,53 @@ import {
 import { Request, Response } from 'express';
 import { AccountService } from './account.service';
 import { Account } from '@prisma/client';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CreatAccountDto } from './dto/create-account.dto';
 
 @Controller('api/v1/account')
+@ApiTags('account')
 export class AccountController {
   constructor(private readonly accountService: AccountService) {}
 
+  @Post()
+  async create(@Body() createAccountDto: CreatAccountDto): Promise<Account> {
+    return this.accountService.create(createAccountDto);
+  }
+
   @Get()
+  @HttpCode(200)
   async getAll(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '10',
-    @Res() response: Response,
-  ) {
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ): Promise<Account[]> {
     const pageToNumber = Number(page);
     const limitToNumber = Number(limit);
+
     const skip =
       pageToNumber > 0 && limitToNumber > 0
         ? (pageToNumber - 1) * limitToNumber
         : 0;
     const take = limitToNumber > 0 ? limitToNumber : 10;
 
-    const result = await this.accountService.getAll(skip, take);
-
-    return response.status(200).json({
-      status: 'Ok!',
-      message: 'Succesfull',
-      result: result,
-    });
+    return this.accountService.getAll(skip, take);
   }
 
   @Get(':accountNumber')
+  @HttpCode(200)
+  @ApiResponse({
+    status: 200,
+    description: 'The Account found',
+    type: CreatAccountDto,
+  })
   async getById(
     @Param('accountNumber') accountNumber: string,
-    @Res() response: Response,
-  ) {
+  ): Promise<Account> {
     const result = await this.accountService.getById(Number(accountNumber));
 
     if (!result) {
       throw new HttpException('NotFoundException', HttpStatus.NOT_FOUND);
     }
 
-    return response.status(200).json({
-      status: 'Ok!',
-      message: 'Succesfull',
-      result: result,
-    });
+    return result;
   }
 }
