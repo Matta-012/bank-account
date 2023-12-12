@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpException,
@@ -10,15 +9,13 @@ import {
   Post,
   Put,
   Query,
-  Req,
-  Res,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
 import { AccountService } from './account.service';
-import { Account } from '@prisma/client';
+import { Account, Transaction } from '@prisma/client';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
+import { DepositWithdrawAccountDto } from './dto/deposit-withdraw-account.dto';
 
 @Controller('api/v1/account')
 @ApiTags('account')
@@ -40,7 +37,7 @@ export class AccountController {
     return this.accountService.update(Number(accountNumber), updateAccountDto);
   }
 
-  @Put('inactivate/:accountNumber')
+  @Put(':accountNumber/inactivate')
   @HttpCode(200)
   async inactivate(
     @Param('accountNumber') accountNumber: string,
@@ -48,12 +45,52 @@ export class AccountController {
     return this.accountService.inactivate(Number(accountNumber));
   }
 
-  @Put('activate/:accountNumber')
+  @Put(':accountNumber/activate')
   @HttpCode(200)
   async activate(
     @Param('accountNumber') accountNumber: string,
   ): Promise<Account> {
     return this.accountService.activate(Number(accountNumber));
+  }
+
+  @Put(':accountNumber/deposit')
+  @HttpCode(200)
+  async deposit(
+    @Param('accountNumber') accountNumber: string,
+    @Body() depositWithdrawAccountDto: DepositWithdrawAccountDto,
+  ): Promise<Transaction> {
+    const [, transaction] = await this.accountService.deposit(
+      Number(accountNumber),
+      depositWithdrawAccountDto,
+    );
+
+    return transaction;
+  }
+
+  @Put(':accountNumber/withdraw')
+  @HttpCode(200)
+  async withdraw(
+    @Param('accountNumber') accountNumber: string,
+    @Body() depositWithdrawAccountDto: DepositWithdrawAccountDto,
+  ): Promise<Transaction> {
+    try {
+      const transaction = await this.accountService.withdraw(
+        Number(accountNumber),
+        depositWithdrawAccountDto,
+      );
+
+      return transaction;
+    } catch (error) {
+      if (error.response.status === 400) {
+        throw new HttpException(
+          {
+            status: HttpStatus.BAD_REQUEST,
+            error: 'Insufficient funds',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
   }
 
   @Get()

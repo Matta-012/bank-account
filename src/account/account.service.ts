@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { Account } from '@prisma/client';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Account, Transaction } from '@prisma/client';
 import { IAccount } from './account.model';
 import { PrismaService } from 'src/prisma.service';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
+import { DepositWithdrawAccountDto } from './dto/deposit-withdraw-account.dto';
 
 @Injectable()
 export class AccountService implements IAccount {
@@ -60,5 +61,68 @@ export class AccountService implements IAccount {
         updated_at: new Date(),
       },
     });
+  }
+
+  async deposit(
+    accountNumber: number,
+    depositWithdrawAccountDto: DepositWithdrawAccountDto,
+  ): Promise<[Account, Transaction]> {
+    const [account, transaction] = await this.prisma.$transaction([
+      this.prisma.account.update({
+        where: { account_number: accountNumber },
+        data: {
+          balance: { increment: depositWithdrawAccountDto.amount },
+          updated_at: new Date(),
+        },
+      }),
+      this.prisma.transaction.create({
+        data: {
+          account: { connect: { account_number: accountNumber } },
+          transaction_type: { connect: { id: 1 } },
+          amount: depositWithdrawAccountDto.amount,
+          description: depositWithdrawAccountDto.description || null,
+        },
+      }),
+    ]);
+
+    return [account, transaction];
+  }
+
+  async withdraw(
+    accountNumber: number,
+    depositWithdrawAccountDto: DepositWithdrawAccountDto,
+  ): Promise<Transaction> {
+    const transaction = await this.prisma.$transaction(async (prisma) => {
+      const account = await prisma.account.update({
+        where: { account_number: accountNumber },
+        data: {
+          balance: { decrement: depositWithdrawAccountDto.amount },
+          updated_at: new Date(),
+        },
+      });
+
+      if (Number(account.balance) < 0) {
+        throw new HttpException(
+          {
+            status: HttpStatus.BAD_REQUEST,
+            error: 'Insufficient funds',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const transaction = await prisma.transaction.create({
+        data: {
+          account: { connect: { account_number: accountNumber } },
+          transaction_type: { connect: { id: 2 } },
+          amount: depositWithdrawAccountDto.amount,
+          description: depositWithdrawAccountDto.description || null,
+        },
+      });
+
+      return transaction;
+    });
+
+    return transaction;
   }
 }
