@@ -1,4 +1,3 @@
-// import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from 'src/prisma.service';
 import { AccountService } from './account.service';
