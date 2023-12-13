@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { AccountService } from './account.service';
 import { Account, Transaction } from '@prisma/client';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { DepositWithdrawAccountDto } from './dto/deposit-withdraw-account.dto';
@@ -113,11 +113,6 @@ export class AccountController {
 
   @Get(':accountNumber')
   @HttpCode(200)
-  @ApiResponse({
-    status: 200,
-    description: 'The Account found',
-    type: CreateAccountDto,
-  })
   async getById(
     @Param('accountNumber') accountNumber: string,
   ): Promise<Account> {

@@ -8,7 +8,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { Transaction } from '@prisma/client';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { TransactionService } from './transaction.service';
 
 @Controller('api/v1/transaction')
@@ -36,11 +36,6 @@ export class TransactionController {
 
   @Get(':transactionId')
   @HttpCode(200)
-  @ApiResponse({
-    status: 200,
-    description: 'The Account found',
-    type: '',
-  })
   async getById(
     @Param('transactionId') transactionId: string,
   ): Promise<Transaction> {
@@ -55,11 +50,6 @@ export class TransactionController {
 
   @Get('accountNumber/:accountNumber')
   @HttpCode(200)
-  @ApiResponse({
-    status: 200,
-    description: 'The Account found',
-    type: '',
-  })
   async getByAccountNumber(
     @Param('accountNumber') accountNumber: string,
   ): Promise<Transaction[]> {
