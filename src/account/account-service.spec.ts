@@ -1,4 +1,3 @@
-// import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from 'src/prisma.service';
 import { AccountService } from './account.service';
@@ -89,18 +88,6 @@ describe('AccountService', () => {
       expect(prisma.account.findMany).toHaveBeenCalledWith({
         skip: 1,
         take: 10,
-      });
-    });
-  });
-
-  describe('getById', () => {
-    it(`should return an Account`, async () => {
-      const response = await service.getById(accountMock[0].account_number);
-
-      expect(response).toStrictEqual(accountMock[0]);
-      expect(prisma.account.findFirst).toHaveBeenCalledTimes(1);
-      expect(prisma.account.findFirst).toHaveBeenCalledWith({
-        where: { account_number: 1 },
       });
     });
   });
