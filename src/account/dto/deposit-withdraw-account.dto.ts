@@ -1,7 +1,8 @@
-import { IsDecimal, IsOptional, IsString } from 'class-validator';
+import { IsDecimal, IsOptional, IsPositive, IsString } from 'class-validator';
 
 export class DepositWithdrawAccountDto {
   @IsDecimal()
+  @IsPositive()
   amount: number;
 
   @IsString()
