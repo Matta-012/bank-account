@@ -1,6 +1,6 @@
 ## 💻 Prerequisites
 
-This application uses [Docker](https://www.docker.com/get-started/) and [Docker Compose](https://docs.docker.com/compose/install/) to start it, so make sure that both tools are installed correctly on your computer.
+This application uses [Node latest](https://nodejs.org/en), [Docker](https://www.docker.com/get-started/) and [Docker Compose](https://docs.docker.com/compose/install/) to run it, so make sure you have all the tools installed correctly on your computer.
 
 ## 🚀 Cloning the Project
 
