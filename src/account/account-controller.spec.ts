@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AccountService } from './account.service';
 import { AccountController } from './account.controller';
+import { plainToInstance } from 'class-transformer';
+import { DepositWithdrawAccountDto } from './dto/deposit-withdraw-account.dto';
+import { validate } from 'class-validator';
 
 const accountMock = [
   {
@@ -168,6 +171,22 @@ describe('AccountController', () => {
       expect(service.deposit).toHaveBeenCalled();
       expect(response).toEqual(transactionMock[0]);
     });
+
+    it('should not deposit a negative amount', async () => {
+      const body = {
+        amount: -700000.99,
+        description: 'Invalid deposit',
+      };
+
+      const dtoObject = plainToInstance(DepositWithdrawAccountDto, body);
+
+      const errors = await validate(dtoObject);
+
+      expect(errors.length).toBe(1);
+      expect(JSON.stringify(errors)).toContain(
+        'amount must be a positive number',
+      );
+    });
   });
 
   describe('withdraw', () => {
@@ -184,6 +203,22 @@ describe('AccountController', () => {
 
       expect(service.withdraw).toHaveBeenCalled();
       expect(response).toEqual(transactionMock[0]);
+    });
+
+    it('should not withdraw a negative amount', async () => {
+      const body = {
+        amount: -700000.99,
+        description: 'Invalid withdraw',
+      };
+
+      const dtoObject = plainToInstance(DepositWithdrawAccountDto, body);
+
+      const errors = await validate(dtoObject);
+
+      expect(errors.length).toBe(1);
+      expect(JSON.stringify(errors)).toContain(
+        'amount must be a positive number',
+      );
     });
   });
 });
