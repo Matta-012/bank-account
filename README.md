@@ -26,6 +26,8 @@ npm install
 npm run migrate
 
 npm run seed
+
+npm run start:dev
 ```
 
 Wait for the commands to run and open the project documentation link:
